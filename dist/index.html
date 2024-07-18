@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+<script defer src="main.js"></script><link href="style.css" rel="stylesheet"></head>
+<body>
+    <div class="page-wrapper">
+        <div class="header">
+            <img class="logo" src="images/to-do-list.png" alt="">
+            <h1>Todo List</h1>
+        </div>
+        <div class="content-wrapper">
+            <div class="sidebar">
+                
+            </div>
+            <div class="content-right-wrapper">
+                <div class="item-wrapper">
+
+                </div>
+                <div class="buttons-wrapper">
+                    <button class="cta add-item" id="add-item">Add Item</button>
+                    <button class="cta add-project" id="add-project">Add Project</button>
+                </div>
+            </div>
+        </div>
+        <dialog id="dialog-item">
+            <h2>Add Todo Item</h2>
+            <form class="item-form" id="item-form" action="" method="post">
+                <div class="input-wrapper">
+                    <label for="title-input-item">Todo Title</label>
+                    <input type="text" id="title-input-item">
+                </div>
+                <div class="input-wrapper">
+                    <label for="description-input">Description</label>
+                    <input type="text" id="description-input">
+                </div>
+                <!-- <div class="input-wrapper">
+                    <label for="due-date-input">Due Date</label>
+                    <input type="text" id="due-date-input">
+                </div>
+                <div class="input-wrapper">
+                    <label for="priority-input">Priority</label>
+                    <input type="text" id="priority-input">
+                </div> -->
+                <div class="add-button-wrapper"><button type="submit" class="cta" id="add-item-form">Add Item</button></div>
+            </form>
+            <button class="cta" id="dialog-item-close">Close</button>
+        </dialog>
+        <dialog id="dialog-project">
+            <h2>Add Project</h2>
+            <form class="project-form" id="project-form" action="" method="post">
+                <div class="input-wrapper">
+                    <label for="title-input-project">Project Title</label>
+                    <input type="text" id="title-input-project">
+                </div>
+                <div class="add-button-wrapper"><button type="submit" class="cta" id="add-project-form">Add Project</button></div>
+            </form>
+            <button class="cta" id="dialog-project-close">Close</button>
+        </dialog>
+    </div>
+</body>
+</html>
