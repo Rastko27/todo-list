@@ -1,10 +1,3 @@
-// Should have title, description, dueDate and priority
-// Title and description simple text
-// dueDate formatting using date-fns
-// Write priority function which will sort the item order based on priority
-// Write a function that controls DOM, should clear and rewrite all items once a new one is added or an existing one is deleted
-// Each one should have a delete button
-
 import './style.css';
 
 window.projectList = [];
@@ -25,6 +18,25 @@ class Item {
         this.description = description;
     }
 }
+
+// DOM Manipulation
+const DOM = (function() {
+
+    // Append Project to DOM
+
+    function addToSidebar(project, index) {
+        const sidebar = document.getElementById('sidebar');
+        let newProject = document.createElement('div');
+        newProject.textContent = project.name;
+        newProject.id = "project-" + index;
+        newProject.classList.add("sidebar-project");
+        console.log(newProject);
+        sidebar.appendChild(newProject);
+        console.log("Added to sidebar");
+    }
+
+    return { addToSidebar };
+})();
 
 // Project dialog open
 const addProject = document.getElementById('add-project');
@@ -47,11 +59,11 @@ const projectTitleInput = document.getElementById('title-input-project');
 projectForm.addEventListener("submit", (event) => {
     event.preventDefault();
 
-    let newProject = new Project(projectTitleInput.value);
+    let newProject = new Project(projectTitleInput.value.toUpperCase());
     console.log("New project added: ", newProject);
     projectList.push(newProject);
     console.log("New project pushed, project list: ", projectList);
-});
+    let index = projectList.length - 1;
 
-// When a project is created add a tab to sidebar and make clicking on it show the project similar to restaurant
-// On every project tab have add item button with different ID and each add item button corresponds to the project it is in and adds the item to the project it is in
+    DOM.addToSidebar(newProject, index);
+});

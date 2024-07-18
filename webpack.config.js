@@ -33,23 +33,13 @@ module.exports = {
           },
         ],
       },
-      {
-        test: /\.(woff|woff2|eot|ttf|otf)$/,
-        use: [
-            {
-                loader: 'file-loader',
-                options: {
-                    name: '[name].[ext]',
-                    outputPath: 'fonts/'
-                }
-            }
-        ]
-    }
     ],
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './src/index.html',
+        template: './src/index.html',
+        filename: 'index.html',
+        inject: 'body'
     }),
     new MiniCssExtractPlugin({
         filename: 'style.css',
