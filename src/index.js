@@ -19,10 +19,60 @@ class Item {
     }
 }
 
+const projectDialog = document.getElementById('dialog-project');
+const itemDialog = document.getElementById('dialog-item');
+const buttonsWrapper = document.getElementById('buttons-wrapper');
+
+// Project dialog close
+const projectDialogClose = document.getElementById('dialog-project-close');
+projectDialogClose.addEventListener("click", () => {
+    projectDialog.close();
+    projectDialog.style.display = "none";
+});
+
+// Item dialog close
+const itemDialogClose = document.getElementById('dialog-item-close');
+itemDialogClose.addEventListener("click", () => {
+    itemDialog.close();
+    itemDialog.style.display = "none";
+});
+
 // DOM Manipulation
 const DOM = (function() {
 
-    //Switch Project
+    // Button renders
+
+    // Render Add Project Button
+    function renderAddProject(buttonsWrapper) {
+        const addProjectButton = document.createElement('button');
+        addProjectButton.textContent = "Add Project";
+        addProjectButton.classList.add("cta");
+        addProjectButton.id = "add-project";
+        buttonsWrapper.appendChild(addProjectButton);
+
+        addProjectButton.addEventListener("click", () => {
+            // Project dialog open
+            projectDialog.style.display = "flex";
+            projectDialog.showModal();
+        });
+    }
+
+    // Render Add Item Button
+    function renderItemProject(buttonsWrapper) {
+        const addItemButton = document.createElement('button');
+        addItemButton.textContent = "Add Item";
+        addItemButton.classList.add("cta");
+        addItemButton.id = "add-item";
+        buttonsWrapper.appendChild(addItemButton);
+
+        addItemButton.addEventListener("click", () => {
+            // Item dialog open
+            itemDialog.style.display = "flex";
+            itemDialog.showModal();
+        });
+    }
+
+    // Switch Project
 
     function switchProject(index) {
         const projectObject = projectList[index];
@@ -34,13 +84,8 @@ const DOM = (function() {
         const items = document.getElementById('items');
         items.innerHTML = '';
 
-        const buttonsWrapper = document.getElementById('buttons-wrapper');
         buttonsWrapper.innerHTML = '';
-        const addProjectButton = document.createElement('button');
-        addProjectButton.textContent = "Add Project";
-        addProjectButton.classList.add("cta");
-        addProjectButton.id = "add-project";
-        buttonsWrapper.appendChild(addProjectButton);
+        renderAddProject(buttonsWrapper);
 
         for(let i = 0; i < projectObject.items.length; i++) {
             let item = document.createElement('div');
@@ -60,11 +105,7 @@ const DOM = (function() {
             items.appendChild(item);
         }
 
-        const addItemButton = document.createElement('button');
-        addItemButton.textContent = "Add Item";
-        addItemButton.classList.add("cta");
-        addItemButton.id = "add-item";
-        buttonsWrapper.appendChild(addItemButton);
+        renderItemProject(buttonsWrapper);
     }
 
     // Append Project to DOM
@@ -84,22 +125,8 @@ const DOM = (function() {
         });
     }
 
-    return { addToSidebar };
+    return { addToSidebar, renderAddProject };
 })();
-
-// Project dialog open
-const addProject = document.getElementById('add-project');
-const projectDialog = document.getElementById('dialog-project');
-addProject.addEventListener("click", () => {
-    projectDialog.style.display = "flex";
-    projectDialog.showModal();
-});
-// Project dialog close
-const projectDialogClose = document.getElementById('dialog-project-close');
-projectDialogClose.addEventListener("click", () => {
-    projectDialog.close();
-    projectDialog.style.display = "none";
-});
 
 // Add project
 const projectForm = document.getElementById('project-form');
@@ -116,3 +143,5 @@ projectForm.addEventListener("submit", (event) => {
 
     DOM.addToSidebar(newProject, index);
 });
+
+DOM.renderAddProject(buttonsWrapper);
