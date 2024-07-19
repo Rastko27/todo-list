@@ -16,12 +16,12 @@
                 
             </div>
             <div class="content-right-wrapper" id="content-right">
-                <div id="project-heading"></div>
+                <h2 id="project-heading"></h2>
                 <div class="item-wrapper" id="items">
 
                 </div>
                 <div class="buttons-wrapper" id="buttons-wrapper">
-                    
+
                 </div>
             </div>
         </div>
@@ -39,11 +39,18 @@
                 <!-- <div class="input-wrapper">
                     <label for="due-date-input">Due Date</label>
                     <input type="text" id="due-date-input">
-                </div>
-                <div class="input-wrapper">
-                    <label for="priority-input">Priority</label>
-                    <input type="text" id="priority-input">
                 </div> -->
+                <div class="input-wrapper input-wrapper-radio">
+                    <label>Priority</label>
+                    <div class="radio-wrapper">
+                        <label for="low">Low</label>
+                        <input type="radio" id="low" name="priority-input">
+                        <label for="medium">Medium</label>
+                        <input type="radio" id="medium" name="priority-input">
+                        <label for="high">High</label>
+                        <input type="radio" id="high" name="priority-input">
+                    </div>
+                </div>
                 <div class="add-button-wrapper"><button type="submit" class="cta" id="add-item-form">Add Item</button></div>
             </form>
             <button class="cta" id="dialog-item-close">Close</button>
