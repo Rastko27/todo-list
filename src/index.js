@@ -1,6 +1,7 @@
 import './style.css';
 
 window.projectList = [];
+let currentProjectIndex = null;
 
 class Project {
     constructor(name) {
@@ -13,9 +14,10 @@ class Project {
 }
 
 class Item {
-    constructor(name, description) {
+    constructor(name, description, priority) {
         this.name = name;
         this.description = description;
+        this.priority = priority;
     }
 }
 
@@ -58,7 +60,7 @@ const DOM = (function() {
     }
 
     // Render Add Item Button
-    function renderItemProject(buttonsWrapper) {
+    function renderAddItem(buttonsWrapper) {
         const addItemButton = document.createElement('button');
         addItemButton.textContent = "Add Item";
         addItemButton.classList.add("cta");
@@ -75,37 +77,18 @@ const DOM = (function() {
     // Switch Project
 
     function switchProject(index) {
+        currentProjectIndex = index;
         const projectObject = projectList[index];
 
         const projectHeading = document.getElementById('project-heading');
-        projectHeading.textContent = '';
         projectHeading.textContent = projectObject.name;
-
-        const items = document.getElementById('items');
-        items.innerHTML = '';
 
         buttonsWrapper.innerHTML = '';
         renderAddProject(buttonsWrapper);
+        
+        renderItems(projectObject);
 
-        for(let i = 0; i < projectObject.items.length; i++) {
-            let item = document.createElement('div');
-            let itemLeft = document.createElement('div');
-            let itemTitle = document.createElement('div');
-            let itemDescription = document.createElement('div');
-            let itemRight = document.createElement('div');
-            item.classList.add("item");
-            itemLeft.classList.add("item-left");
-            itemRight.classList.add("item-right");
-            itemTitle.textContent = projectObject.items[i].name;
-            itemDescription.textContent = projectObject.items[i].description;
-            itemLeft.appendChild(itemTitle);
-            itemLeft.appendChild(itemDescription);
-            item.appendChild(itemLeft);
-            item.appendChild(itemRight);
-            items.appendChild(item);
-        }
-
-        renderItemProject(buttonsWrapper);
+        renderAddItem(buttonsWrapper);
     }
 
     // Append Project to DOM
@@ -125,7 +108,34 @@ const DOM = (function() {
         });
     }
 
-    return { addToSidebar, renderAddProject };
+    // Render Items
+
+    function renderItems(project) {
+        const items = document.getElementById('items');
+        items.innerHTML = '';
+        for(let i = 0; i < project.items.length; i++) {
+            let item = document.createElement('div');
+            let itemLeft = document.createElement('div');
+            let itemTitle = document.createElement('div');
+            let itemDescription = document.createElement('div');
+            let itemRight = document.createElement('div');
+            item.classList.add("item");
+            itemLeft.classList.add("item-left");
+            itemRight.classList.add("item-right");
+            itemTitle.textContent = project.items[i].name;
+            itemTitle.classList.add("item-title");
+            itemDescription.textContent = project.items[i].description;
+            itemLeft.appendChild(itemTitle);
+            itemLeft.appendChild(itemDescription);
+            item.appendChild(itemLeft);
+            item.appendChild(itemRight);
+            items.appendChild(item);
+        }
+    }
+
+    // Render item buttons
+
+    return { addToSidebar, renderAddProject, renderItems };
 })();
 
 // Add project
@@ -143,5 +153,22 @@ projectForm.addEventListener("submit", (event) => {
 
     DOM.addToSidebar(newProject, index);
 });
+
+// Add item
+const itemForm = document.getElementById('item-form');
+const itemTitleInput = document.getElementById('title-input-item');
+const itemDescriptionInput = document.getElementById('description-input');
+
+itemForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    let newItem = new Item(itemTitleInput.value, itemDescriptionInput.value);
+    console.log("New item added: ", newItem);
+
+    projectList[currentProjectIndex].items.push(newItem);
+    console.log("New item pushed, item list: ", projectList[currentProjectIndex].items);
+
+    DOM.renderItems(projectList[currentProjectIndex]);
+})
 
 DOM.renderAddProject(buttonsWrapper);
