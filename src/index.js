@@ -10,6 +10,22 @@ class Project {
     }
     addItem(item) {
         this.items.push(item);
+        this.sortItems();
+    }
+    priorityToString(priorityValue) {
+        switch (priorityValue) {
+            case 1:
+                return "HIGH";
+            case 2:
+                return "MEDIUM";
+            case 3:
+                return "LOW";
+            default:
+                return "UNKNOWN";
+        }
+    }
+    sortItems(project) {
+        this.items.sort((item1, item2) => item1.priority - item2.priority);
     }
 }
 
@@ -17,7 +33,7 @@ class Item {
     constructor(name, description, priority) {
         this.name = name;
         this.description = description;
-        this.priority = priority;
+        this.priority = parseInt(priority);
     }
 }
 
@@ -99,13 +115,26 @@ const DOM = (function() {
         newProject.textContent = project.name;
         newProject.id = "project-" + index;
         newProject.classList.add("sidebar-project");
-        console.log(newProject);
         sidebar.appendChild(newProject);
-        console.log("Added to sidebar");
 
         newProject.addEventListener("click", () => {
             switchProject(index);
         });
+    }
+
+    // Priority color check
+
+    function priorityCheck(itemPriority) {
+        switch (itemPriority) {
+            case 3:
+                return "#008000";
+            case 2:
+                return "#FFD700";
+            case 1:
+                return "#A50021";
+            default:
+                return "#000000";
+        }
     }
 
     // Render Items
@@ -119,14 +148,19 @@ const DOM = (function() {
             let itemTitle = document.createElement('div');
             let itemDescription = document.createElement('div');
             let itemRight = document.createElement('div');
+            let priorityTag = document.createElement('div');
             item.classList.add("item");
             itemLeft.classList.add("item-left");
             itemRight.classList.add("item-right");
             itemTitle.textContent = project.items[i].name;
             itemTitle.classList.add("item-title");
             itemDescription.textContent = project.items[i].description;
+            priorityTag.textContent = project.priorityToString(project.items[i].priority);
+            priorityTag.classList.add("item-priority");
+            priorityTag.style.backgroundColor = priorityCheck(project.items[i].priority);
             itemLeft.appendChild(itemTitle);
             itemLeft.appendChild(itemDescription);
+            itemRight.appendChild(priorityTag);
             item.appendChild(itemLeft);
             item.appendChild(itemRight);
             items.appendChild(item);
@@ -138,7 +172,7 @@ const DOM = (function() {
     return { addToSidebar, renderAddProject, renderItems };
 })();
 
-// Add project
+// Project Form Submit
 const projectForm = document.getElementById('project-form');
 const projectTitleInput = document.getElementById('title-input-project');
 
@@ -146,15 +180,13 @@ projectForm.addEventListener("submit", (event) => {
     event.preventDefault();
 
     let newProject = new Project(projectTitleInput.value.toUpperCase());
-    console.log("New project added: ", newProject);
     projectList.push(newProject);
-    console.log("New project pushed, project list: ", projectList);
     let index = projectList.length - 1;
 
     DOM.addToSidebar(newProject, index);
 });
 
-// Add item
+// Item Form Submit
 const itemForm = document.getElementById('item-form');
 const itemTitleInput = document.getElementById('title-input-item');
 const itemDescriptionInput = document.getElementById('description-input');
@@ -162,11 +194,21 @@ const itemDescriptionInput = document.getElementById('description-input');
 itemForm.addEventListener("submit", (event) => {
     event.preventDefault();
 
-    let newItem = new Item(itemTitleInput.value, itemDescriptionInput.value);
-    console.log("New item added: ", newItem);
+    // Get priority
 
-    projectList[currentProjectIndex].items.push(newItem);
-    console.log("New item pushed, item list: ", projectList[currentProjectIndex].items);
+    let priority = '';
+
+    const radioButtons = document.querySelectorAll('input[name="priority-input"]');
+    
+    radioButtons.forEach((radio) => {
+        if(radio.checked) {
+            priority = radio.value;
+        }
+    });
+
+    let newItem = new Item(itemTitleInput.value, itemDescriptionInput.value, priority);
+
+    projectList[currentProjectIndex].addItem(newItem);
 
     DOM.renderItems(projectList[currentProjectIndex]);
 })
