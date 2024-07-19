@@ -90,6 +90,7 @@ h1,h2 {
     font-size: 15px;
     font-weight: 600;
     margin-right: 3px;
+    cursor: pointer;
 }
 
 .content-right-wrapper {
@@ -99,7 +100,20 @@ h1,h2 {
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-    padding: 20px;
+    padding: 20px 10px;
+}
+
+.content-right-wrapper > h2 {
+    margin: 0;
+}
+
+.item-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 15px;
+    margin-top: 10px;
 }
 
 .item {
@@ -115,6 +129,10 @@ h1,h2 {
 
 .item-left {
     width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
 }
 
 .item-right {
