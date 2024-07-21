@@ -25,8 +25,12 @@ class Project {
                 return "UNKNOWN";
         }
     }
-    sortItems(project) {
+    sortItems() {
         this.items.sort((item1, item2) => item1.priority - item2.priority);
+    }
+    itemDelete(project, index) {
+        project.items.splice(index, 1);
+        DOM.renderItems(project);
     }
 }
 
@@ -66,10 +70,58 @@ itemDialogClose.addEventListener("click", () => {
 const DOM = (function() {
 
     // Item expand
-
     function itemExpand(item) {
         item.classList.toggle("expanded");
-        console.log("Toggled expand on item: " + item);
+    }
+
+    // Item edit form
+    function editForm(project, index) {
+        const editDialog = document.getElementById('dialog-edit-item');
+        const editTitleInput = document.getElementById('edit-title-input');
+        const editDescriptionInput = document.getElementById('edit-description-input');
+        const editDueDateInput = document.getElementById('edit-due-date-input');
+        const editPriorityInputs = document.querySelectorAll('input[name="edit-priority-input"]');
+    
+        // Set form values
+        editTitleInput.value = project.items[index].name;
+        editDescriptionInput.value = project.items[index].description;
+        editDueDateInput.value = project.items[index].dueDate;
+        editPriorityInputs.forEach(radio => {
+            if (radio.value == project.items[index].priority) {
+                radio.checked = true;
+            }
+        });
+    
+        // Open dialog
+        editDialog.style.display = "flex";
+        editDialog.showModal();
+    
+        // Save changes
+        const editItemForm = document.getElementById('edit-item-form');
+        editItemForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+    
+            // Get updated values
+            const updatedTitle = editTitleInput.value;
+            const updatedDescription = editDescriptionInput.value;
+            const updatedDueDate = editDueDateInput.value;
+            const updatedPriority = document.querySelector('input[name="edit-priority-input"]:checked').value;
+    
+            // Update item
+            project.items[index] = new Item(updatedTitle, updatedDescription, updatedPriority, updatedDueDate);
+    
+            // Close dialog and re-render items
+            editDialog.close();
+            editDialog.style.display = "none";
+            renderItems(project);
+        });
+    
+        // Close dialog
+        const editDialogClose = document.getElementById('dialog-edit-item-close');
+        editDialogClose.addEventListener("click", () => {
+            editDialog.close();
+            editDialog.style.display = "none";
+        });
     }
 
     // Button renders
@@ -166,6 +218,8 @@ const DOM = (function() {
             let priorityTag = document.createElement('div');
             let itemDueDate = document.createElement('div');
             let itemExpandButton = document.createElement('button');
+            let checkButton = document.createElement('button');
+            let editButton = document.createElement('button');
 
             item.classList.add("item");
             itemWrapperTop.classList.add('item-wrapper-top');
@@ -190,19 +244,40 @@ const DOM = (function() {
             itemDescription.textContent = project.items[i].description;
             itemDescription.classList.add("item-description");
 
+            checkButton.textContent = "Done ✅";
+            checkButton.classList.add("item-utility-button");
+
+            editButton.textContent = "Edit 📝";
+            editButton.classList.add("item-utility-button");
+            editButton.classList.add("edit-button");
+
             // Item expand event listener
 
             itemExpandButton.addEventListener("click", () => {
                 itemExpand(item);
             });
 
+            // Check button event listener
+
+            checkButton.addEventListener("click", () => {
+                itemDelete(project, i);
+            });
+
+            // Edit button event listener
+            editButton.addEventListener("click", () => {
+                editForm(project, i);
+            });
+
             itemLeft.appendChild(itemTitle);
             itemRight.appendChild(itemDueDate);
+            itemRight.appendChild(checkButton);
             itemRight.appendChild(priorityTag);
             itemRight.appendChild(itemExpandButton);
 
             itemWrapperTop.appendChild(itemLeft);
             itemWrapperTop.appendChild(itemRight);
+
+            itemDescription.appendChild(editButton);
 
             item.appendChild(itemWrapperTop);
             item.appendChild(itemDescription);
@@ -218,7 +293,7 @@ const DOM = (function() {
 
 // Dialog Methods
 
-const dialogMethods = (function() {
+const formMethods = (function() {
     // Project Form Submit
     const projectForm = document.getElementById('project-form');
     const projectTitleInput = document.getElementById('title-input-project');
