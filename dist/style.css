@@ -121,15 +121,39 @@ h1,h2 {
 }
 
 .item {
+    overflow: hidden;
+    position: relative;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
     background-color: var(--beige);
-    padding: 20px 20px;
+    padding: 15px 20px 15px 25px;
     border-radius: 5px;
     font-size: 16px;
     color: var(--brown);
     font-weight: 500;
+}
+
+.item-wrapper-top {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item-description {
+    max-height: 0px;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+    opacity: 0;
+}
+
+.item.expanded > .item-description {
+    max-height: none;
+    opacity: 1;
+    margin-top: 10px;
+    padding-bottom: 10px;
 }
 
 .item-left {
@@ -137,16 +161,15 @@ h1,h2 {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 10px;
+    gap: 20px;
     padding-right: 10px;
 }
 
 .item-right {
+    width: 100%;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 10px;
-    min-width: 25%;
 }
 
 .item-title {
@@ -159,6 +182,22 @@ h1,h2 {
     color: var(--light-beige);
     padding: 10px 5px;
     border-radius: 5px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.item-expand-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    background-color: transparent;
+    border: none;
+}
+
+.item-expand-button > img {
+    width: 27px;
+    height: 27px;
 }
 
 .add-item-wrapper {
@@ -252,6 +291,11 @@ input[type = "radio"] {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+textarea {
+    height: 30px;
+    width: 200px;
 }
 
 /* ---------- */

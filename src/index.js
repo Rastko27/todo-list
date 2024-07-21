@@ -1,4 +1,5 @@
 import './style.css';
+import { format, parseISO} from 'date-fns';
 
 window.projectList = [];
 let currentProjectIndex = null;
@@ -30,15 +31,21 @@ class Project {
 }
 
 class Item {
-    constructor(name, description, priority) {
+    constructor(name, description, priority, dueDate) {
         this.name = name;
         this.description = description;
         this.priority = parseInt(priority);
+        this.dueDate = dueDate;
     }
 }
 
+// Project dialog selector
 const projectDialog = document.getElementById('dialog-project');
+
+// Item dialog selector
 const itemDialog = document.getElementById('dialog-item');
+
+// Buttons wrapper selector
 const buttonsWrapper = document.getElementById('buttons-wrapper');
 
 // Project dialog close
@@ -57,6 +64,13 @@ itemDialogClose.addEventListener("click", () => {
 
 // DOM Manipulation
 const DOM = (function() {
+
+    // Item expand
+
+    function itemExpand(item) {
+        item.classList.toggle("expanded");
+        console.log("Toggled expand on item: " + item);
+    }
 
     // Button renders
 
@@ -144,25 +158,55 @@ const DOM = (function() {
         items.innerHTML = '';
         for(let i = 0; i < project.items.length; i++) {
             let item = document.createElement('div');
+            let itemWrapperTop = document.createElement('div');
+            let itemDescription = document.createElement('div');
             let itemLeft = document.createElement('div');
             let itemTitle = document.createElement('div');
-            let itemDescription = document.createElement('div');
             let itemRight = document.createElement('div');
             let priorityTag = document.createElement('div');
+            let itemDueDate = document.createElement('div');
+            let itemExpandButton = document.createElement('button');
+
             item.classList.add("item");
+            itemWrapperTop.classList.add('item-wrapper-top');
             itemLeft.classList.add("item-left");
             itemRight.classList.add("item-right");
+
             itemTitle.textContent = project.items[i].name;
             itemTitle.classList.add("item-title");
-            itemDescription.textContent = project.items[i].description;
+
             priorityTag.textContent = project.priorityToString(project.items[i].priority);
             priorityTag.classList.add("item-priority");
             priorityTag.style.backgroundColor = priorityCheck(project.items[i].priority);
+
+            const dueDate = parseISO(project.items[i].dueDate);
+            const formattedDueDate = format(dueDate, 'MMM dd, yyyy');
+            itemDueDate.textContent = "Due: " + formattedDueDate;
+            itemDueDate.classList.add("item-due-date");
+
+            itemExpandButton.innerHTML = "<img src='images/down.png' alt=''>";
+            itemExpandButton.classList.add("item-expand-button");
+
+            itemDescription.textContent = project.items[i].description;
+            itemDescription.classList.add("item-description");
+
+            // Item expand event listener
+
+            itemExpandButton.addEventListener("click", () => {
+                itemExpand(item);
+            });
+
             itemLeft.appendChild(itemTitle);
-            itemLeft.appendChild(itemDescription);
+            itemRight.appendChild(itemDueDate);
             itemRight.appendChild(priorityTag);
-            item.appendChild(itemLeft);
-            item.appendChild(itemRight);
+            itemRight.appendChild(itemExpandButton);
+
+            itemWrapperTop.appendChild(itemLeft);
+            itemWrapperTop.appendChild(itemRight);
+
+            item.appendChild(itemWrapperTop);
+            item.appendChild(itemDescription);
+
             items.appendChild(item);
         }
     }
@@ -172,45 +216,71 @@ const DOM = (function() {
     return { addToSidebar, renderAddProject, renderItems };
 })();
 
-// Project Form Submit
-const projectForm = document.getElementById('project-form');
-const projectTitleInput = document.getElementById('title-input-project');
+// Dialog Methods
 
-projectForm.addEventListener("submit", (event) => {
-    event.preventDefault();
+const dialogMethods = (function() {
+    // Project Form Submit
+    const projectForm = document.getElementById('project-form');
+    const projectTitleInput = document.getElementById('title-input-project');
 
-    let newProject = new Project(projectTitleInput.value.toUpperCase());
-    projectList.push(newProject);
-    let index = projectList.length - 1;
+    const handleProjectFormSubmit = (event) => {
+        event.preventDefault();
 
-    DOM.addToSidebar(newProject, index);
-});
+        // Check if form is filled
+        if(projectTitleInput.value !== '') {
+            let newProject = new Project(projectTitleInput.value.toUpperCase());
+            projectList.push(newProject);
+            let index = projectList.length - 1;
 
-// Item Form Submit
-const itemForm = document.getElementById('item-form');
-const itemTitleInput = document.getElementById('title-input-item');
-const itemDescriptionInput = document.getElementById('description-input');
-
-itemForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    // Get priority
-
-    let priority = '';
-
-    const radioButtons = document.querySelectorAll('input[name="priority-input"]');
-    
-    radioButtons.forEach((radio) => {
-        if(radio.checked) {
-            priority = radio.value;
+            DOM.addToSidebar(newProject, index);
         }
-    });
+        else {
+            alert("Please enter project title");
+        }
+    };
 
-    let newItem = new Item(itemTitleInput.value, itemDescriptionInput.value, priority);
+    projectForm.addEventListener("submit", handleProjectFormSubmit);
 
-    projectList[currentProjectIndex].addItem(newItem);
+    // Item Form Submit
+    const itemForm = document.getElementById('item-form');
+    const itemTitleInput = document.getElementById('title-input-item');
+    const itemDescriptionInput = document.getElementById('description-input');
+    const itemDueDate = document.getElementById('due-date-input');
 
-    DOM.renderItems(projectList[currentProjectIndex]);
-})
+    const handleItemFormSubmit = (event) => {
+        event.preventDefault();
+
+        // Get priority
+        let priority = '';
+
+        const radioButtons = document.querySelectorAll('input[name="priority-input"]');
+        
+        radioButtons.forEach((radio) => {
+            if(radio.checked) {
+                priority = radio.value;
+            }
+        });
+
+        // Check if everything is filled out
+        if(itemTitleInput.value !== '' && itemDescriptionInput.value && priority !== '' && itemDueDate.value !== '') {
+
+            let newItem = new Item(itemTitleInput.value, itemDescriptionInput.value, priority, itemDueDate.value);
+
+            projectList[currentProjectIndex].addItem(newItem);
+
+        }
+        else {
+            alert("Please fill out all the information.")
+        }
+
+        DOM.renderItems(projectList[currentProjectIndex]);
+    };
+
+    itemForm.addEventListener("submit", handleItemFormSubmit);
+
+    return { handleProjectFormSubmit, handleItemFormSubmit };
+})();
+
+// Initial render
 
 DOM.renderAddProject(buttonsWrapper);

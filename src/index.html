@@ -27,19 +27,19 @@
         </div>
         <dialog id="dialog-item">
             <h2>Add Todo Item</h2>
-            <form class="item-form" id="item-form" action="" method="post">
+            <form class="item-form" id="item-form">
                 <div class="input-wrapper">
                     <label for="title-input-item">Todo Title</label>
                     <input type="text" id="title-input-item">
                 </div>
                 <div class="input-wrapper">
                     <label for="description-input">Description</label>
-                    <input type="text" id="description-input">
+                    <textarea name="description" id="description-input"></textarea>
                 </div>
-                <!-- <div class="input-wrapper">
+                <div class="input-wrapper">
                     <label for="due-date-input">Due Date</label>
-                    <input type="text" id="due-date-input">
-                </div> -->
+                    <input type="date" id="due-date-input">
+                </div>
                 <div class="input-wrapper input-wrapper-radio">
                     <div>Priority</div>
                     <div class="radio-wrapper">
@@ -57,7 +57,7 @@
         </dialog>
         <dialog id="dialog-project">
             <h2>Add Project</h2>
-            <form class="project-form" id="project-form" action="" method="post">
+            <form class="project-form" id="project-form">
                 <div class="input-wrapper">
                     <label for="title-input-project">Project Title</label>
                     <input type="text" id="title-input-project">
