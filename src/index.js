@@ -28,10 +28,6 @@ class Project {
     sortItems() {
         this.items.sort((item1, item2) => item1.priority - item2.priority);
     }
-    itemDelete(project, index) {
-        project.items.splice(index, 1);
-        DOM.renderItems(project);
-    }
 }
 
 class Item {
@@ -43,31 +39,52 @@ class Item {
     }
 }
 
-// Project dialog selector
-const projectDialog = document.getElementById('dialog-project');
+// Dialog methods
+const dialogMethods = (function() {
+    // Project dialog selector
+    const projectDialog = document.getElementById('dialog-project');
 
-// Item dialog selector
-const itemDialog = document.getElementById('dialog-item');
+    // Item dialog selector
+    const itemDialog = document.getElementById('dialog-item');
+
+    // Project dialog close
+    const projectDialogClose = document.getElementById('dialog-project-close');
+    projectDialogClose.addEventListener("click", () => {
+        projectDialog.close();
+        projectDialog.style.display = "none";
+    });
+
+    // Item dialog close
+    const itemDialogClose = document.getElementById('dialog-item-close');
+    itemDialogClose.addEventListener("click", () => {
+        itemDialog.close();
+        itemDialog.style.display = "none";
+    });
+
+    return { projectDialog, itemDialog, projectDialogClose, itemDialogClose};
+})();
 
 // Buttons wrapper selector
 const buttonsWrapper = document.getElementById('buttons-wrapper');
 
-// Project dialog close
-const projectDialogClose = document.getElementById('dialog-project-close');
-projectDialogClose.addEventListener("click", () => {
-    projectDialog.close();
-    projectDialog.style.display = "none";
-});
-
-// Item dialog close
-const itemDialogClose = document.getElementById('dialog-item-close');
-itemDialogClose.addEventListener("click", () => {
-    itemDialog.close();
-    itemDialog.style.display = "none";
-});
-
 // DOM Manipulation
 const DOM = (function() {
+
+    // Delete item from DOM
+    function itemDelete(project, projectIndex, index) {
+        // Remove from project items array
+        project.items.splice(index, 1);
+
+        // Remove from local storage
+        storageMethods.removeItemFromStorage(projectIndex, index);
+
+        DOM.renderItems(project);
+    }
+
+    // Page refresh
+    function refreshPage() {
+        location.reload();
+    }
 
     // Item expand
     function itemExpand(item) {
@@ -109,6 +126,9 @@ const DOM = (function() {
     
             // Update item
             project.items[index] = new Item(updatedTitle, updatedDescription, updatedPriority, updatedDueDate);
+
+            // Update item in storage
+            storageMethods.addItemToStorage(currentProjectIndex, project.items[index], index);
     
             // Close dialog and re-render items
             editDialog.close();
@@ -136,8 +156,8 @@ const DOM = (function() {
 
         addProjectButton.addEventListener("click", () => {
             // Project dialog open
-            projectDialog.style.display = "flex";
-            projectDialog.showModal();
+            dialogMethods.projectDialog.style.display = "flex";
+            dialogMethods.projectDialog.showModal();
         });
     }
 
@@ -151,8 +171,8 @@ const DOM = (function() {
 
         addItemButton.addEventListener("click", () => {
             // Item dialog open
-            itemDialog.style.display = "flex";
-            itemDialog.showModal();
+            dialogMethods.itemDialog.style.display = "flex";
+            dialogMethods.itemDialog.showModal();
         });
     }
 
@@ -166,22 +186,22 @@ const DOM = (function() {
         projectHeading.textContent = projectObject.name;
 
         buttonsWrapper.innerHTML = '';
-        renderAddProject(buttonsWrapper);
         
         renderItems(projectObject);
 
+        renderAddProject(buttonsWrapper);
         renderAddItem(buttonsWrapper);
     }
 
     // Append Project to DOM
 
     function addToSidebar(project, index) {
-        const sidebar = document.getElementById('sidebar');
+        const projectsWrapper = document.getElementById('projects-wrapper');
         let newProject = document.createElement('div');
         newProject.textContent = project.name;
         newProject.id = "project-" + index;
         newProject.classList.add("sidebar-project");
-        sidebar.appendChild(newProject);
+        projectsWrapper.appendChild(newProject);
 
         newProject.addEventListener("click", () => {
             switchProject(index);
@@ -260,7 +280,7 @@ const DOM = (function() {
             // Check button event listener
 
             checkButton.addEventListener("click", () => {
-                itemDelete(project, i);
+                itemDelete(project, currentProjectIndex, i);
             });
 
             // Edit button event listener
@@ -288,7 +308,7 @@ const DOM = (function() {
 
     // Render item buttons
 
-    return { addToSidebar, renderAddProject, renderItems };
+    return { addToSidebar, renderAddProject, renderItems, refreshPage };
 })();
 
 // Dialog Methods
@@ -306,6 +326,8 @@ const formMethods = (function() {
             let newProject = new Project(projectTitleInput.value.toUpperCase());
             projectList.push(newProject);
             let index = projectList.length - 1;
+
+            storageMethods.addProjectToStorage(newProject, index);
 
             DOM.addToSidebar(newProject, index);
         }
@@ -343,6 +365,10 @@ const formMethods = (function() {
 
             projectList[currentProjectIndex].addItem(newItem);
 
+            let itemIndex = projectList[currentProjectIndex].items.length - 1;
+
+            storageMethods.addItemToStorage(currentProjectIndex, newItem, itemIndex);
+
         }
         else {
             alert("Please fill out all the information.")
@@ -356,6 +382,105 @@ const formMethods = (function() {
     return { handleProjectFormSubmit, handleItemFormSubmit };
 })();
 
+// Local storage
+
+const storageMethods = (function() {
+
+    // Reset local storage
+    function resetStorage() {
+        localStorage.clear();
+        DOM.refreshPage();
+    }
+
+    // Reset button event listener
+    const resetButton = document.getElementById('reset-button');
+    resetButton.addEventListener("click", () => {
+        resetStorage();
+    });
+
+    // Add project to storage
+    function addProjectToStorage(project, index) {
+        // Convert object to JSON string
+        let projectJSON = JSON.stringify(project);
+        // Store in local storage
+        localStorage.setItem(`project-${index}`, projectJSON);
+    }
+
+    // Get project from storage
+    function getProjectFromStorage(projectIndex) {
+        let projectJSON = localStorage.getItem("project-" + projectIndex);
+
+        if (projectJSON) {
+            let projectData = JSON.parse(projectJSON);
+            let project = new Project(projectData.name);
+
+            // Get items for this project
+            let itemIndex = 0;
+            while (true) {
+                let itemJSON = localStorage.getItem(`project-${projectIndex}-item-${itemIndex}`);
+                // Breaks while loop when no more items from that project
+                if (!itemJSON) break;
+
+                let itemData = JSON.parse(itemJSON);
+                let item = new Item(itemData.name, itemData.description, itemData.priority, itemData.dueDate);
+                project.items.push(item);
+                itemIndex++;
+            }
+
+            return project;
+        } else {
+            console.log("No project found");
+        }
+    }
+
+    // Add item to storage
+    function addItemToStorage(projectIndex, item, index) {
+        let itemJSON = JSON.stringify(item);
+        localStorage.setItem(`project-${projectIndex}-item-${index}`, itemJSON);
+    }
+
+    // Remove item from storage
+    function removeItemFromStorage(projectIndex, itemIndex) {
+        localStorage.removeItem(`project-${projectIndex}-item-${itemIndex}`);
+
+        // Shift other items up in local storage
+
+        // Start from first item up
+        let nextItemIndex = itemIndex + 1;
+        while(true) {
+            // Get next item from storage using nextItemIndex
+            let nextItemJSON = localStorage.getItem(`project-${projectIndex}-item-${nextItemIndex}`);
+            if (!nextItemJSON) break;
+
+            // Move item down by one index
+            localStorage.setItem(`project-${projectIndex}-item-${nextItemIndex - 1}`, nextItemJSON);
+            localStorage.removeItem(`project-${projectIndex}-item-${nextItemIndex}`);
+            nextItemIndex++;
+        }
+    }
+
+    // Check for projects on load
+    function projectInitialLoad() {
+        for(let i = 0; i < localStorage.length; i++) {
+            let key = localStorage.key(i);
+
+            // Check if key is a project (starts with project- and doesn't have -item-)
+            if (key.startsWith('project-') && !key.includes('-item-')) {
+                let index = key.substring('project-'.length);
+                const project = getProjectFromStorage(index);
+                if (project) {
+                    projectList.push(project);
+                    DOM.addToSidebar(project, index);
+                }
+            }
+        }
+    }
+
+    return { addProjectToStorage, getProjectFromStorage, projectInitialLoad, addItemToStorage, removeItemFromStorage };
+
+})();
+
 // Initial render
 
+storageMethods.projectInitialLoad();
 DOM.renderAddProject(buttonsWrapper);
