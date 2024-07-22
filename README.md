@@ -57,7 +57,7 @@ To get started with this project:
 
 ## Deployment
 
-The project is deployed to GitHub Pages. You can view the live application [here](https://your-username.github.io/todo-list/).
+The project is deployed to GitHub Pages. You can view the live application [here](https://rastko27.github.io/todo-list/).
 
 ## Development
 
